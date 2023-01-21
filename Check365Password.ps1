@@ -1,15 +1,22 @@
-﻿Write-Host -ForegroundColor Yellow "...::: Outil de vérification de mot de passe Microsoft 365 :::..."
-while(0 -lt 1){
-$Credential = Get-Credential
-Write-Host -ForegroundColor Yellow "Test de connexion en cours... " -NoNewline
-$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://ps.outlook.com/powershell/ -Credential $Credential -Authentication Basic -AllowRedirection
-Import-PSSession $Session | Out-Null
+<#
+Script PowerShell qui vérifie si un mot de passe Microsoft 365 est correct
+#>
 
-if ($Error.Count -eq 0) {
-    Write-Host -ForegroundColor Green "Connexion OK !"
-}else{
-    Write-Host -ForegroundColor Red "Erreur de connexion ! Le mot de passe est-il correct ?"
+# Définir le paramètre pour le nom d'utilisateur et le mot de passe
+param (
+   [string]$UserName,
+   [string]$Password
+)
+ 
+# Connecter à Exchange Online
+$Session = New-PSSession -ConfigurationName Microsoft.Exchange -ConnectionUri https://outlook.office365.com/powershell-liveid/ -Credential (New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $UserName, $(ConvertTo-SecureString -String $Password -AsPlainText -Force)) -Authentication Basic -AllowRedirection
+
+# Tester l'authentification 
+if ($Session) {
+   Write-Host "Le mot de passe est correct"
+} else {
+   Write-Host "Le mot de passe est incorrect"
 }
 
-Remove-PSSession $Session
-}
+# Fermer la session
+Remove-PSSession -Session $Session
